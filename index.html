@@ -147,6 +147,9 @@ h2::after{content:"";display:block;width:56px;height:4px;border-radius:2px;backg
 @media(min-width:1600px){main,.hw{max-width:1280px}}
 @media(max-width:767px){.grid{grid-template-columns:repeat(2,1fr);gap:1rem}main,.hw{padding-inline:14px}}
 @media(max-width:340px){.grid{grid-template-columns:1fr}}
+
+.thumbs{display:flex;gap:.5rem;flex-wrap:wrap;margin:.3rem 0 .6rem}.th{position:relative;width:76px;height:76px}.th img{width:100%;height:100%;object-fit:cover;border-radius:.6rem}.th button{position:absolute;top:-6px;inset-inline-end:-6px;width:26px;height:26px;border-radius:50%;border:0;background:#dc2626;color:#fff;cursor:pointer}
+.gt{width:56px;height:56px;object-fit:cover;border-radius:.5rem;cursor:pointer;border:1px solid var(--bd)}.inf{background:var(--bg);border-radius:.7rem;padding:.7rem;font-size:.9rem;margin:.5rem 0}
 </style>
 </head>
 <body>
@@ -164,12 +167,24 @@ h2::after{content:"";display:block;width:56px;height:4px;border-radius:2px;backg
 <nav id="bn"></nav>
 <div id="md"></div>
 <script>
-const ADMIN={phone:'01099442329',pass:'1099442329'},WA='201099442329',SUP1='201017693188';
+const FB={db:'',key:'',email:''}; /* املأها بعد إنشاء مشروع Firebase */
+const ADMIN={phone:'01099442329',h:'13a0dkz'},WA='201099442329',SUP1='201017693188';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const load=(k,d)=>{try{const v=JSON.parse(localStorage.getItem('fk_'+k));return v??d}catch(e){return d}};
 const save=(k,v)=>{try{localStorage.setItem('fk_'+k,JSON.stringify(v))}catch(e){setTimeout(()=>toast('⚠️ المساحة ممتلئة: استخدم صوراً أصغر أو احذف منتجات قديمة'),0)}};
 const hash=s=>{let h=5381;for(const c of 'fk'+s)h=(h*33)^c.charCodeAt(0);return (h>>>0).toString(36)};
+
+const cloud=!!(FB.db&&FB.key&&FB.email);let fbTok='',fbT0=0;
+const pimg=p=>(p.imgs&&p.imgs[0])||p.img||'';
+const gal=p=>{const l=p.imgs&&p.imgs.length?p.imgs:(p.img?[p.img]:[]);return l.length?`<img id="gm" src="${esc(l[0])}" alt="" style="width:100%;max-height:300px;object-fit:contain;border-radius:.8rem" onerror="this.remove()">`+(l.length>1?`<div class="row" style="margin:.5rem 0">${l.map(u=>`<img src="${esc(u)}" alt="" class="gt" onclick="$('#gm').src=this.src">`).join('')}</div>`:''):'<div class="ph" style="border-radius:.8rem">📦</div>'};
+const fbU=(path,t)=>FB.db.replace(/\/$/,'')+'/'+path+'.json'+(t?'?auth='+t:'');
+async function fbLogin(pw){try{const r=await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key='+FB.key,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:FB.email,password:pw,returnSecureToken:true})});const j=await r.json();if(!j.idToken)throw 0;fbTok=j.idToken;fbT0=Date.now();return true}catch(e){return false}}
+async function tok(){if(!fbTok||Date.now()-fbT0>3000000){const pw=sessionStorage.fkpw;if(!pw||!await fbLogin(pw))return null}return fbTok}
+async function pull(){if(!cloud)return;try{const r=await fetch(fbU('products'),{cache:'no-store'});if(!r.ok)return;const j=await r.json(),l=j?Object.values(j):[],sig=JSON.stringify(l);if(sig!==pull.s){pull.s=sig;products=l;save('products',products);if(!document.querySelector('.modal')&&location.hash.slice(1)!=='admin'&&!/INPUT|TEXTAREA|SELECT/.test((document.activeElement||{}).tagName||''))route()}}catch(e){}}
+async function cput(p){if(!cloud)return true;const t=await tok();if(!t){toast('سجّل الدخول كمدير من جديد لمزامنة السحابة',1);return false}try{const r=await fetch(fbU('products/'+p.id,t),{method:'PUT',body:JSON.stringify(p)});if(!r.ok)throw 0;pull.s=null;return true}catch(e){toast('⚠️ فشل الرفع للسحابة',1);return false}}
+async function cdel(id){if(!cloud)return;const t=await tok();if(t)try{await fetch(fbU('products/'+id,t),{method:'DELETE'});pull.s=null}catch(e){}}
+async function cdec(id,q){if(!cloud)return true;for(let i=0;i<4;i++){try{const g=await fetch(fbU('products/'+id+'/stock'),{headers:{'X-Firebase-ETag':'true'},cache:'no-store'}),et=g.headers.get('ETag'),v=await g.json();if(v===null)return true;if(v<q)return false;const r=await fetch(fbU('products/'+id+'/stock'),{method:'PUT',headers:et?{'if-match':et}:{},body:JSON.stringify(v-q)});if(r.ok)return true}catch(e){}}return false}
 let lang=load('lang','ar'),theme=load('theme',matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'),side=load('side','R');
 const T=(a,e)=>lang==='ar'?a:e;
 let products=load('products',null)||[
@@ -207,7 +222,7 @@ function setLang(){lang=lang==='ar'?'en':'ar';save('lang',lang);route()}
 function setSide(){side=side==='R'?'L':'R';save('side',side);const d=$('#dr');d.classList.remove('open');chrome();requestAnimationFrame(()=>requestAnimationFrame(()=>d.classList.add('open')))}
 function card(p){
  const sk=p.stock??99,dc=p.old>p.price?Math.round((1-p.price/p.old)*100):0;
- return `<div class="card"><div style="position:relative;cursor:pointer" onclick="openP(${p.id})">${p.img?`<img src="${esc(p.img)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=ph>📦</div>'">`:'<div class="ph">📦</div>'}${dc?`<span class="disc">-${dc}%</span>`:''}${sk<=0?`<span class="sold">${T('نفدت الكمية','Sold out')}</span>`:''}</div>
+ return `<div class="card"><div style="position:relative;cursor:pointer" onclick="openP(${p.id})">${pimg(p)?`<img src="${esc(pimg(p))}" alt="" loading="lazy" onerror="this.outerHTML='<div class=ph>📦</div>'">`:'<div class="ph">📦</div>'}${dc?`<span class="disc">-${dc}%</span>`:''}${sk<=0?`<span class="sold">${T('نفدت الكمية','Sold out')}</span>`:''}</div>
  <button class="heart" data-p="${p.id}" onclick="toggleW(${p.id})">${wish.includes(p.id)?'❤️':'🤍'}</button>
  <div class="cb"><span class="tag">${catName(p.cat)}</span><h3 style="cursor:pointer" onclick="openP(${p.id})">${esc(p.title)}</h3><div class="sw" data-p="${p.id}">${stars(p.id)}</div>
  <div class="pr">${esc(p.price)} ${T('ج.م','EGP')} ${dc?`<s class="old">${esc(p.old)}</s>`:''}</div>
@@ -276,18 +291,19 @@ cart(){
 },
 admin(){
  if(!isAdmin())return `<div class="box"><div class="msg e">${T('هذه الصفحة للمدير فقط.','Admin only.')}</div></div>`;
- return `<h2>${T('لوحة التحكم','Admin Panel')}</h2><div class="sg"><div><b>${products.length}</b>${T('المنتجات','Products')}</div><div><b>${new Set(orders.map(o=>o.code)).size}</b>${T('الطلبات','Orders')}</div><div><b>${users.length}</b>${T('العملاء','Customers')}</div><div><b>${orders.filter(o=>o.status!=='cancelled').reduce((a,o)=>a+o.price+(o.ship||0)-(o.ds||0),0)}</b>${T('الإيرادات (ج.م)','Revenue (EGP)')}</div></div><div class="box" style="max-width:700px"><h3 id="ft" style="margin-top:0">${T('إضافة منتج','Add Product')}</h3><div id="m"></div><input type="hidden" id="eid"><input type="hidden" id="i">
+ return `<h2>${T('لوحة التحكم','Admin Panel')}</h2><div class="msg ${cloud?'s':'e'}">${cloud?'☁️ السحابة مفعّلة: المنتجات تظهر لكل العملاء':'⚠️ السحابة غير مفعّلة: المنتجات على جهازك فقط. اربط Firebase أولاً.'}</div><div class="sg"><div><b>${products.length}</b>${T('المنتجات','Products')}</div><div><b>${new Set(orders.map(o=>o.code)).size}</b>${T('الطلبات','Orders')}</div><div><b>${users.length}</b>${T('العملاء','Customers')}</div><div><b>${orders.filter(o=>o.status!=='cancelled').reduce((a,o)=>a+o.price+(o.ship||0)-(o.ds||0),0)}</b>${T('الإيرادات (ج.م)','Revenue (EGP)')}</div></div><div class="box" style="max-width:700px"><h3 id="ft" style="margin-top:0">${T('إضافة منتج','Add Product')}</h3><div id="m"></div><input type="hidden" id="eid"><input type="hidden" id="i">
  <label>${T('اسم المنتج','Product name')}</label><input id="t">
- <label>${T('صورة المنتج','Product image')}</label><div class="imgbox"><div class="ip" id="ip">📦</div><div><label class="btn o up">📷 ${T('رفع صورة','Upload')}<input type="file" id="if" accept="image/*" onchange="readImg(this)" hidden></label><button type="button" class="btn r" onclick="setImg('');$('#iu').value=''">${T('حذف','Remove')}</button><input id="iu" dir="ltr" placeholder="${T('أو الصق رابط الصورة https://...','Or paste image URL https://...')}" oninput="setImg(this.value.trim())"></div></div>
+ <label>${T('صورة المنتج','Product image')}</label><div id="ip" class="thumbs"></div><label class="btn o up">📷 ${T('رفع صور (أكثر من صورة)','Upload photos')}<input type="file" id="if" accept="image/*" multiple onchange="readImg(this)" hidden></label><div class="row" style="margin-bottom:.7rem"><input id="iu" dir="ltr" style="flex:1;margin:0" placeholder="${T('أو رابط صورة https://...','Or image URL')}"><button type="button" class="btn o" onclick="addUrl()">+</button></div>
  <label>${T('الوصف','Description')}</label><textarea id="d" rows="2"></textarea>
+ <label>${T('معلومات إضافية (مواصفات، مقاسات...)','Extra info (specs, sizes...)')}</label><textarea id="inf" rows="3"></textarea>
  <div class="fg"><div><label>${T('السعر (ج.م)','Price (EGP)')}</label><input id="pr" type="number" inputmode="decimal" min="0" step="any" oninput="offUI()"></div><div><label>${T('القسم','Category')}</label><select id="c"><option value="latest">${T('حديث','Latest')}</option><option value="best">${T('الأكثر مبيعاً','Best Seller')}</option></select></div></div>
  <label>${T('العرض / الخصم','Offer / Discount')}</label><div class="fg"><select id="ot" onchange="offUI()"><option value="">${T('بدون عرض','No offer')}</option><option value="pct">${T('خصم بنسبة %','Discount %')}</option><option value="fix">${T('سعر العرض الجديد','New offer price')}</option></select><input id="ov" type="number" inputmode="decimal" min="0" step="any" oninput="offUI()" style="display:none" placeholder="${T('القيمة','Value')}"></div><small id="op2" class="pr" style="display:block;margin:-.3rem 0 .7rem"></small>
  <div class="fg"><div><label>${T('الكمية الحالية (فارغ = غير محدود)','Stock (empty = unlimited)')}</label><input id="sk" type="number" inputmode="numeric" min="0"></div><div><label>${T('زيادة كمية (+)','Add stock (+)')}</label><input id="ad" type="number" inputmode="numeric" min="0" placeholder="0"></div></div>
  <label>${T('كود المنتج (فريد)','Product Code (unique)')}</label><input id="cd" dir="ltr">
  <div class="row sv"><button class="btn" style="flex:1" onclick="saveP()">${T('حفظ','Save')}</button><button class="btn o" style="flex:1" onclick="route()">${T('إلغاء','Cancel')}</button></div></div>
- <h3>${T('المنتجات','Products')} (${products.length})</h3><div class="al">${products.map(p=>{const sk=p.stock??99;return `<div class="ai"><div class="at">${p.img?`<img src="${esc(p.img)}" alt="">`:'📦'}</div><div class="am"><b>${esc(p.title)}</b><small dir="ltr">${esc(p.code)}</small><div class="pr">${esc(p.price)} ${T('ج.م','EGP')} ${p.old>p.price?`<s class="old">${esc(p.old)}</s> 🏷️`:''}</div><div class="stp"><button class="ib" onclick="adj(${p.id},-1)">−</button><b class="${sk<=0?'low':''}">${p.stock===undefined?'∞':p.stock}</b><button class="ib" onclick="adj(${p.id},1)">+</button><small class="${sk<=0?'low':''}">${sk<=0?T('نفدت الكمية','Sold out'):T('بالمخزون','in stock')}</small></div></div><div class="aa"><button class="btn o" onclick="editP(${p.id})">${T('تعديل','Edit')}</button><button class="btn r" onclick="delP(${p.id})">${T('حذف','Delete')}</button></div></div>`}).join('')}</div>`;
+ <h3>${T('المنتجات','Products')} (${products.length})</h3><div class="al">${products.map(p=>{const sk=p.stock??99;return `<div class="ai"><div class="at">${pimg(p)?`<img src="${esc(pimg(p))}" alt="">`:'📦'}</div><div class="am"><b>${esc(p.title)}</b><small dir="ltr">${esc(p.code)}</small><div class="pr">${esc(p.price)} ${T('ج.م','EGP')} ${p.old>p.price?`<s class="old">${esc(p.old)}</s> 🏷️`:''}</div><div class="stp"><button class="ib" onclick="adj(${p.id},-1)">−</button><b class="${sk<=0?'low':''}">${p.stock===undefined?'∞':p.stock}</b><button class="ib" onclick="adj(${p.id},1)">+</button><small class="${sk<=0?'low':''}">${sk<=0?T('نفدت الكمية','Sold out'):T('بالمخزون','in stock')}</small></div></div><div class="aa"><button class="btn o" onclick="editP(${p.id})">${T('تعديل','Edit')}</button><button class="btn r" onclick="delP(${p.id})">${T('حذف','Delete')}</button></div></div>`}).join('')}</div>`;
 }};
-const msg=(t,ok)=>{const m=$('#m');if(m)m.innerHTML=`<div class="msg ${ok?'s':'e'}">${esc(t)}</div>`};
+const msg=(t,ok)=>{if(!ok)toast(t,1);const m=$('#m');if(m)m.innerHTML=`<div class="msg ${ok?'s':'e'}">${esc(t)}</div>`};
 function filt(){
  const ws=$('#q').value.trim().toLowerCase().split(/\s+/).filter(Boolean),f=$('#f').value,mn=parseFloat($('#mn').value),mx=parseFloat($('#mx').value),s=$('#s').value;pq=$('#q').value;
  const l=products.filter(p=>{const h=(p.title+' '+p.desc+' '+p.code).toLowerCase();return ws.every(w=>h.includes(w))&&(!f||p.cat===f)&&(isNaN(mn)||p.price>=mn)&&(isNaN(mx)||p.price<=mx)});
@@ -307,12 +323,12 @@ function signup(){
 }
 function login(){
  const p=$('#p').value.trim(),w=$('#w').value;
- if(p===ADMIN.phone&&w===ADMIN.pass){sess={name:T('المدير','Admin'),phone:p,admin:true};save('sess',sess);return go('admin')}
+ if(p===ADMIN.phone&&hash(w)===ADMIN.h){sess={name:T('المدير','Admin'),phone:p,admin:true};save('sess',sess);if(cloud){sessionStorage.fkpw=w;fbLogin(w).then(ok=>{if(!ok)toast('⚠️ تعذّر الاتصال بالسحابة: راجع إعدادات Firebase',1)})}return go('admin')}
  const u=users.find(x=>x.phone===p&&x.pw===hash(w));
  if(!u)return msg(T('رقم الهاتف أو كلمة السر غير صحيحة','Wrong phone number or password'));
  sess={name:u.name.split(' ')[0],phone:u.phone};save('sess',sess);delete sessionStorage.fkok;go('account');
 }
-function logout(){sess=null;save('sess',null);go('home');route()}
+function logout(){fbTok='';delete sessionStorage.fkpw;sess=null;save('sess',null);go('home');route()}
 function reserve(id){
  if(!sess){go('login');return}
  const p=products.find(x=>x.id===id);if(!p)return;
@@ -322,35 +338,37 @@ function reserve(id){
  $('#md').innerHTML=`<div class="modal" onclick="if(event.target===this)this.remove()"><div class="box"><h3 style="margin-top:0">${T('تم حجز طلبك ✅','Order reserved ✅')}</h3><p>${esc(p.title)}</p><div class="code">${code}</div>
  <a class="btn g" style="display:block;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent(txt)}">Click Here to Send Code via WhatsApp<br>اضغط هنا لارسال الكود</a><br><button class="btn o" onclick="this.closest('.modal').remove()">${T('إغلاق','Close')}</button></div></div>`;
 }
-function setImg(v){$('#i').value=v;$('#ip').innerHTML=v?`<img src="${esc(v)}" alt="">`:'📦'}
-function readImg(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const M=800,k=Math.min(1,M/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);setImg(c.toDataURL('image/jpeg',.78));$('#iu').value=''};im.onerror=()=>msg(T('ملف الصورة غير صالح','Invalid image file'));im.src=r.result};r.readAsDataURL(f)}
+let fimgs=[];
+function rImgs(){$('#ip').innerHTML=fimgs.map((u,i)=>`<div class="th"><img src="${esc(u)}" alt=""><button type="button" onclick="fimgs.splice(${i},1);rImgs()">✕</button></div>`).join('')||'<div class="ph" style="height:70px;width:70px;border-radius:.6rem">📦</div>'}
+function addUrl(){const v=$('#iu').value.trim();if(!/^https?:\/\//i.test(v))return msg(T('رابط غير صحيح','Invalid URL'));fimgs.push(v);$('#iu').value='';rImgs()}
+function readImg(inp){[...inp.files].slice(0,8).forEach(f=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,700/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);fimgs.push(c.toDataURL('image/jpeg',.72));rImgs()};im.onerror=()=>msg(T('ملف الصورة غير صالح','Invalid image file'));im.src=r.result};r.readAsDataURL(f)});inp.value=''}
 function offUI(){const o=parseFloat($('#pr').value),t=$('#ot').value,v=parseFloat($('#ov').value);$('#ov').style.display=t?'':'none';let f=null;if(t==='pct'&&v>0&&v<100)f=Math.round(o*(100-v))/100;if(t==='fix'&&v>=0)f=v;$('#op2').textContent=f!=null&&o>0?T('السعر بعد العرض: ','Price after offer: ')+f+' '+T('ج.م','EGP')+' ('+T('بدلاً من ','was ')+o+')':''}
-function saveP(){
+async function saveP(){
  if(!isAdmin())return;
  const v=id=>$('#'+id).value.trim(),eid=+v('eid'),orig=parseFloat(v('pr')),ot=v('ot'),ov=parseFloat(v('ov'));
- if(!v('t')||!v('cd')||!(orig>=0))return msg(T('الاسم والسعر والكود مطلوبة','Name, price and code are required'));
+ if(!v('t')||!(orig>=0))return msg(T('الاسم والسعر مطلوبين','Name and price are required'));
  let price=orig,old=0;
  if(ot==='pct'){if(!(ov>0&&ov<100))return msg(T('نسبة الخصم بين 1 و 99','Discount must be between 1 and 99'));old=orig;price=Math.round(orig*(100-ov))/100}
  else if(ot==='fix'){if(!(ov>=0&&ov<orig))return msg(T('سعر العرض يجب أن يكون أقل من السعر','Offer price must be lower than price'));old=orig;price=ov}
  let stock=v('sk')===''?undefined:Math.max(0,parseInt(v('sk'))||0);const ad=parseInt(v('ad'))||0;if(ad>0)stock=(stock??0)+ad;
- const o={title:v('t'),img:v('i'),desc:v('d'),price,old,cat:v('c'),code:v('cd'),stock};
- if(o.img&&!/^(https?:\/\/|data:image\/)/i.test(o.img))return msg(T('رابط الصورة يجب أن يبدأ بـ http','Image URL must start with http(s)'));
- if(products.some(p=>p.code===o.code&&p.id!==eid))return msg(T('كود المنتج مستخدم بالفعل','Product code already in use'));
- if(eid)Object.assign(products.find(p=>p.id===eid),o);else products.push({...o,id:Date.now(),t:Date.now()});
- save('products',products);route();toast(T('تم الحفظ ✓','Saved ✓'));
+ const o={title:v('t'),img:'',imgs:[...fimgs],info:v('inf'),desc:v('d'),price,old,cat:v('c'),code:v('cd')||'P-'+String(Date.now()).slice(-6),stock};
+  if(products.some(p=>p.code===o.code&&p.id!==eid))return msg(T('كود المنتج مستخدم بالفعل','Product code already in use'));
+ let p;if(eid){p=products.find(x=>x.id===eid);Object.assign(p,o)}else{p={...o,id:Date.now(),t:Date.now()};products.push(p)}
+ save('products',products);toast(T('جارٍ الحفظ...','Saving...'));const ok=await cput(p);route();
+ toast(!cloud?T('تم الحفظ على هذا الجهاز فقط (السحابة غير مفعّلة)','Saved on this device only'):ok?T('تم الحفظ ونشره لكل العملاء ✓','Saved & published ✓'):T('تم الحفظ محلياً لكن لم يُرفع للسحابة','Saved locally, not uploaded'),cloud&&!ok);
 }
 function editP(id){
  const p=products.find(x=>x.id===id),dc=p.old>p.price;
  $('#ft').textContent=T('تعديل منتج','Edit Product');$('#eid').value=id;$('#t').value=p.title;$('#d').value=p.desc;$('#c').value=p.cat;$('#cd').value=p.code;$('#sk').value=p.stock??'';$('#ad').value='';
- $('#pr').value=dc?p.old:p.price;$('#ot').value=dc?'fix':'';$('#ov').value=dc?p.price:'';setImg(p.img||'');$('#iu').value=/^https?:/i.test(p.img||'')?p.img:'';offUI();scrollTo(0,0);
+ $('#pr').value=dc?p.old:p.price;$('#ot').value=dc?'fix':'';$('#ov').value=dc?p.price:'';fimgs=[...(p.imgs||(p.img?[p.img]:[]))];rImgs();$('#inf').value=p.info||'';offUI();scrollTo(0,0);
 }
-function adj(id,d){const p=products.find(x=>x.id===id);if(!p||!isAdmin())return;p.stock=Math.max(0,(p.stock??0)+d);save('products',products);const y=scrollY;route();scrollTo(0,y)}
-function delP(id){if(isAdmin()&&confirm(T('حذف المنتج؟','Delete this product?'))){products=products.filter(p=>p.id!==id);save('products',products);route()}}
+function adj(id,d){const p=products.find(x=>x.id===id);if(!p||!isAdmin())return;p.stock=Math.max(0,(p.stock??0)+d);save('products',products);cput(p);const y=scrollY;route();scrollTo(0,y)}
+function delP(id){if(isAdmin()&&confirm(T('حذف المنتج؟','Delete this product?'))){products=products.filter(p=>p.id!==id);save('products',products);cdel(id);route()}}
 const avg=id=>{const r=Object.values(ratings[id]||{});return r.length?r.reduce((a,b)=>a+b,0)/r.length:0};
 const cartN=()=>cart.reduce((a,c)=>a+c.q,0);
 function stars(id){const a=avg(id),n=Object.keys(ratings[id]||{}).length;return `<div class="stars">${[1,2,3,4,5].map(i=>`<span class="${a>=i-.5?'on':''}" onclick="rate(${id},${i})">★</span>`).join('')} <small>${n?a.toFixed(1)+' ('+n+')':T('لا تقييمات','No ratings')}</small></div>`}
 function rate(id,n){if(!sess){go('login');return}(ratings[id]=ratings[id]||{})[sess.phone]=n;save('ratings',ratings);document.querySelectorAll('.sw[data-p="'+id+'"]').forEach(e=>e.innerHTML=stars(id))}
-function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),1800)}
+function toast(t,bad){const e=document.createElement('div');e.className='toast';e.textContent=t;if(bad)e.style.background='#dc2626';document.body.appendChild(e);setTimeout(()=>e.remove(),bad?3800:1800)}
 function addCart(id){const p=products.find(x=>x.id===id),c=cart.find(x=>x.id===id);if(!p||(c?c.q:0)>=(p.stock??99)){toast(T('الكمية المتاحة لا تكفي','Not enough stock'));return}c?c.q++:cart.push({id,q:1});save('cart',cart);chrome();toast(T('تمت الإضافة للسلة ✓','Added to cart ✓'))}
 function qty(id,d){const c=cart.find(x=>x.id===id),pp=products.find(x=>x.id===id);if(!c)return;if(d>0&&pp&&c.q>=(pp.stock??99)){toast(T('الكمية المتاحة لا تكفي','Not enough stock'));return}c.q+=d;if(c.q<1)cart=cart.filter(x=>x!==c);save('cart',cart);route()}
 function hs(){pq=$('#hq').value;go('shop')}
@@ -370,18 +388,19 @@ function openP(id){
  const p=products.find(x=>x.id===id);if(!p)return;recent=[id,...recent.filter(x=>x!==id)].slice(0,8);save('recent',recent);
  const sk=p.stock??99,dc=p.old>p.price?Math.round((1-p.price/p.old)*100):0,rel=products.filter(x=>x.id!==id&&x.cat===p.cat).slice(0,3);
  $('#md').innerHTML=`<div class="modal" onclick="if(event.target===this)this.remove()"><div class="box" style="max-width:720px;width:100%;max-height:90vh;overflow:auto;text-align:start"><div style="text-align:end"><button class="ib" onclick="this.closest('.modal').remove()">✕</button></div>
- ${p.img?`<img src="${esc(p.img)}" alt="" style="width:100%;max-height:280px;object-fit:contain;border-radius:.8rem" onerror="this.remove()">`:'<div class="ph" style="border-radius:.8rem">📦</div>'}
+ ${gal(p)}
  <h3>${esc(p.title)}</h3><small>${T('كود','Code')}: ${esc(p.code)} · ${catName(p.cat)}</small><div class="sw" data-p="${id}">${stars(id)}</div>
  <div class="pr" style="font-size:1.4rem">${esc(p.price)} ${T('ج.م','EGP')} ${dc?`<s class="old">${esc(p.old)}</s> <span class="disc" style="position:static">-${dc}%</span>`:''}</div>
- <p class="${sk<=5?'low':''}">${sk<=0?T('نفدت الكمية','Out of stock'):sk<=5?T('متبقي '+sk+' فقط','Only '+sk+' left'):T('متوفر في المخزون','In stock')}</p><p>${esc(p.desc)}</p>
+ <p class="${sk<=5?'low':''}">${sk<=0?T('نفدت الكمية','Out of stock'):sk<=5?T('متبقي '+sk+' فقط','Only '+sk+' left'):T('متوفر في المخزون','In stock')}</p><p>${esc(p.desc)}</p>${p.info?`<div class="inf">${esc(p.info).replace(/\n/g,'<br>')}</div>`:''}
  <div class="row"><button class="btn g" ${sk<=0?'disabled':''} onclick="addCart(${id})">🛒 ${T('أضف إلى السلة','Add to Cart')}</button><button class="btn o" onclick="toggleW(${id});this.textContent=(wish.includes(${id})?'❤️ ':'🤍 ')+'${T('المفضلة','Wishlist')}'">${wish.includes(id)?'❤️':'🤍'} ${T('المفضلة','Wishlist')}</button></div>
  <div class="cm" id="cm${id}" style="margin-top:1rem">${cmHtml(id)}</div>
  ${rel.length?`<p style="margin-bottom:.3rem"><b>${T('منتجات مشابهة','Related products')}</b></p><div class="row">${rel.map(x=>`<button class="btn o" onclick="openP(${x.id})">${esc(x.title)}</button>`).join('')}</div>`:''}</div></div>`;
 }
-function confirmOrder(){
+async function confirmOrder(){
  if(!sess){go('login');return}
- const c=calc();if(!c.it.length)return;
- if(c.it.some(x=>x.q>(x.p.stock??99))){toast(T('بعض المنتجات كميتها غير كافية','Some items exceed available stock'));return}
+ await pull();const c=calc();if(!c.it.length)return;
+ if(c.it.some(x=>x.q>(x.p.stock??99))){toast(T('بعض المنتجات كميتها غير كافية','Some items exceed available stock'),1);return}
+ for(const x of c.it){if(!await cdec(x.p.id,x.q)){toast(T('نفدت كمية: ','Sold out: ')+x.p.title,1);await pull();return}}
  const u=c.u||{name:sess.name,phone:sess.phone,email:'-',gov:'-'};
  const code='FK-'+Date.now().toString(36).toUpperCase()+Math.random().toString(36).slice(2,5).toUpperCase();
  c.it.forEach((x,i)=>{orders.push({code,id:x.p.id,title:x.p.title+' ×'+x.q,price:x.p.price*x.q,phone:sess.phone,name:sess.name,t:Date.now(),status:'pending',pay,...(i?{}:{ship:c.ship,ds:c.ds})});x.p.stock=Math.max(0,(x.p.stock??99)-x.q)});
@@ -396,13 +415,14 @@ function confirmOrder(){
 }
 function route(){
  let r=location.hash.slice(1)||'home';if(!V[r])r='home';
- drawer(0);chrome();$('#app').innerHTML=V[r]();if(r==='shop')filt();document.querySelectorAll('.rt').forEach(t=>{const h=[...t.rows[0].cells].map(c=>c.textContent);[...t.rows].slice(1).forEach(r=>[...r.cells].forEach((c,i)=>c.dataset.l=h[i]||''))});scrollTo(0,0);
+ drawer(0);chrome();$('#app').innerHTML=V[r]();if(r==='shop')filt();if(r==='admin'){fimgs=[];rImgs()}document.querySelectorAll('.rt').forEach(t=>{const h=[...t.rows[0].cells].map(c=>c.textContent);[...t.rows].slice(1).forEach(r=>[...r.cells].forEach((c,i)=>c.dataset.l=h[i]||''))});scrollTo(0,0);
 }
 addEventListener('hashchange',route);
 addEventListener('storage',e=>{if(e.key&&e.key.startsWith('fk_')){products=load('products',products);comments=load('comments',{});orders=load('orders',[]);users=load('users',[]);route()}});
 addEventListener('focusin',e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)&&innerWidth<1024)document.body.classList.add('kb')});
 addEventListener('focusout',()=>setTimeout(()=>{if(!/INPUT|TEXTAREA|SELECT/.test((document.activeElement||{}).tagName||''))document.body.classList.remove('kb')},150));
 route();
+if(cloud){pull();setInterval(pull,20000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)pull()})}
 </script>
 </body>
 </html>
