@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f59e0b">
 <title>El-Fakharany Store</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -17,7 +18,7 @@ body{margin:0;font-family:'Cairo',Tahoma,'Segoe UI',Arial,sans-serif;background:
 header{position:sticky;top:0;z-index:20;background:var(--gl);backdrop-filter:blur(12px);border-bottom:1px solid var(--bd)}
 .hw{max-width:1200px;margin:auto;padding:.55rem 1rem;display:flex;align-items:center;gap:.5rem}
 .logo{font-weight:800;font-size:1.25rem;color:var(--ac);cursor:pointer;margin-inline-end:auto;letter-spacing:.3px;direction:ltr;white-space:nowrap}
-.hl{display:none;gap:.2rem}@media(min-width:900px){.hl{display:flex}}
+.hl{display:none;gap:.2rem}@media(min-width:1024px){.hl{display:flex}}
 .hl a,.dl a{color:var(--tx);text-decoration:none;padding:.4rem .9rem;border-radius:2rem;font-size:.9rem;font-weight:600;cursor:pointer;transition:.2s}
 .hl a:hover,.hl a.on{background:var(--ac);color:#111}
 .ib{width:40px;height:40px;border-radius:50%;border:1px solid var(--bd);background:var(--card);color:var(--tx);cursor:pointer;font-size:1.05rem;display:inline-flex;align-items:center;justify-content:center;font-family:inherit;font-weight:700;transition:.2s}
@@ -39,7 +40,7 @@ main{max-width:1200px;margin:auto;padding:1rem 1rem 6rem}
 .hero h1{margin:0 0 .4rem;font-size:1.8rem;font-weight:800}.hero p{margin:0 0 1rem;color:#cbd5e1}
 h2{border-inline-start:5px solid var(--ac);padding-inline-start:.6rem;margin:1.8rem 0 .8rem;font-weight:800}
 .grid{display:grid;gap:1rem;grid-template-columns:1fr}
-@media(min-width:640px){.grid{grid-template-columns:repeat(2,1fr)}}@media(min-width:960px){.grid{grid-template-columns:repeat(4,1fr)}}
+@media(min-width:768px){.grid{grid-template-columns:repeat(2,1fr)}}@media(min-width:1024px){.grid{grid-template-columns:repeat(4,1fr)}}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:1rem;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 2px 10px #0001}
 .card img,.ph{width:100%;height:180px;object-fit:cover;background:var(--bd);display:flex;align-items:center;justify-content:center;font-size:3rem}
 .cb{padding:.8rem;display:flex;flex-direction:column;gap:.4rem;flex:1}
@@ -74,16 +75,16 @@ label{font-size:.85rem;font-weight:700}a{color:var(--ac2)}
 .sg div{background:var(--card);border:1px solid var(--bd);border-radius:1rem;padding:.8rem;text-align:center;font-size:.85rem}.sg b{display:block;font-size:1.4rem;color:var(--ac)}
 .stt{padding:.1rem .6rem;border-radius:1rem;font-size:.75rem;font-weight:700;background:var(--bd)}
 .btn:disabled{opacity:.5;cursor:not-allowed}
-html{-webkit-text-size-adjust:100%}body{overflow-x:hidden}*{-webkit-tap-highlight-color:transparent}button,a{touch-action:manipulation}
+html{-webkit-text-size-adjust:100%}html,body{overflow-x:clip;max-width:100%}*{-webkit-tap-highlight-color:transparent}button,a{touch-action:manipulation}
 #bn{display:none}
 @media(hover:none){.btn:hover,.ib:hover{transform:none;filter:none}#sup .tip{display:none}}
-@media(max-width:899px){
+@media(max-width:1023px){
  #bn{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:25;background:var(--gl);backdrop-filter:blur(12px);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom,0px)}
  #bn a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:56px;font-size:.68rem;font-weight:700;color:var(--mu);cursor:pointer;position:relative}
  #bn a span{font-size:1.3rem;line-height:1.1}#bn a.on{color:var(--ac)}
  main{padding-bottom:6.5rem}#sup{bottom:calc(72px + env(safe-area-inset-bottom,0px))}.hc{display:none}
 }
-@media(max-width:639px){
+@media(max-width:767px){
  .grid{grid-template-columns:repeat(2,1fr);gap:.6rem}
  .card img,.ph{height:130px;font-size:2.2rem}
  .cb{padding:.55rem;gap:.25rem}.cb h3{font-size:.85rem;line-height:1.35}.cb .pr{font-size:.95rem}.cb .btn{padding:.45rem .3rem;font-size:.78rem}.tag{font-size:.62rem}.stars span{font-size:1rem}
@@ -100,15 +101,52 @@ html{-webkit-text-size-adjust:100%}body{overflow-x:hidden}*{-webkit-tap-highligh
 .imgbox{display:flex;gap:.7rem;align-items:flex-start;margin:.25rem 0 .7rem}
 .ip,.at{width:96px;height:96px;flex:none;border-radius:.8rem;background:var(--bd);display:flex;align-items:center;justify-content:center;font-size:2rem;overflow:hidden}.ip img,.at img{width:100%;height:100%;object-fit:cover}
 .imgbox>div:last-child{flex:1;min-width:0}.up{display:inline-flex;align-items:center;cursor:pointer;margin:0 .3rem .4rem 0}
-.al{display:grid;gap:.7rem;grid-template-columns:1fr}@media(min-width:900px){.al{grid-template-columns:1fr 1fr}}
+.al{display:grid;gap:.7rem;grid-template-columns:1fr}@media(min-width:1024px){.al{grid-template-columns:1fr 1fr}}
 .ai{background:var(--card);border:1px solid var(--bd);border-radius:1rem;padding:.7rem;display:flex;gap:.7rem;align-items:center}
 .at{width:72px;height:72px}.am{flex:1;min-width:0;display:flex;flex-direction:column;gap:.15rem}.am b{overflow-wrap:anywhere}
 .stp{display:flex;align-items:center;gap:.5rem}.stp .ib{width:36px;height:36px}.aa{display:flex;flex-direction:column;gap:.3rem}
 .sold{position:absolute;inset:0;background:#000a;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.95rem}
 body{min-height:100dvh}
 @media(hover:none){.ib{width:44px;height:44px}.stp .ib{width:40px;height:40px}}
-@media(max-width:639px){.sv{position:sticky;bottom:calc(60px + env(safe-area-inset-bottom,0px));background:var(--card);padding:.6rem 0;margin-top:.4rem;z-index:5}.ai{flex-wrap:wrap}.aa{flex-direction:row;width:100%}.aa .btn{flex:1}.sg b{font-size:1.15rem}.at{width:64px;height:64px}.ip{width:84px;height:84px}}
+@media(max-width:767px){.sv{position:sticky;bottom:calc(60px + env(safe-area-inset-bottom,0px));background:var(--card);padding:.6rem 0;margin-top:.4rem;z-index:5}.ai{flex-wrap:wrap}.aa{flex-direction:row;width:100%}.aa .btn{flex:1}.sg b{font-size:1.15rem}.at{width:64px;height:64px}.ip{width:84px;height:84px}}
 @media(max-width:340px){.fg{grid-template-columns:1fr}}
+
+#bn,#sup{position:fixed;-webkit-transform:translate3d(0,0,0);transform:translate3d(0,0,0);will-change:transform}
+.logo{overflow:hidden;text-overflow:ellipsis;min-width:0}
+body.kb #bn,body.kb #sup{display:none!important}
+@media(max-width:1023px){
+ .bg i{animation:none;filter:blur(50px);opacity:.18}.hero{animation:none}
+ header{background:var(--card);backdrop-filter:none;-webkit-backdrop-filter:none}
+ #bn{background:var(--card);backdrop-filter:none;left:0;right:0;bottom:0;box-shadow:0 -2px 12px #0002}
+ #bn a{min-height:60px;font-size:.72rem}#bn a span{font-size:1.4rem}
+ main{padding-bottom:calc(7rem + env(safe-area-inset-bottom,0px))}
+ .rt tr:first-child{display:none}.rt,.rt tbody,.rt tr,.rt td{display:block}
+ .rt tr{border:1px solid var(--bd);border-radius:.8rem;padding:.4rem .7rem;margin-bottom:.6rem}
+ .rt td{display:flex;justify-content:space-between;gap:.6rem;border:0;padding:.25rem 0;text-align:end}
+ .rt td::before{content:attr(data-l);color:var(--mu);font-weight:700;flex:none;text-align:start}
+ .box{max-width:100%!important}
+}
+@media(max-width:767px){
+ body{font-size:15px}h2{font-size:1.1rem}
+ .hero{border-radius:1rem;padding:1.4rem .9rem}.hero p{font-size:.85rem}
+ .hb .btn{padding:.35rem .7rem;font-size:.78rem;min-height:38px}
+ .dr{width:78vw}
+ .toast{bottom:calc(150px + env(safe-area-inset-bottom,0px));max-width:90vw;text-align:center}
+}
+
+/* ===== responsive spec: mobile <=767 | tablet 768-1023 | desktop >=1024 ===== */
+body{line-height:1.75}
+img,video,svg{max-width:100%}p,h1,h2,h3,td,.cb h3{overflow-wrap:anywhere}
+main,.hw{width:100%;max-width:1280px;margin-inline:auto;padding-inline:20px}
+h2{text-align:center;border:0;padding:0;margin:2rem 0 1.3rem}
+h2::after{content:"";display:block;width:56px;height:4px;border-radius:2px;background:var(--ac);margin:.5rem auto 0}
+.hero{display:flex;flex-direction:column;align-items:center;justify-content:center}.hero h1{margin-bottom:1.2rem;line-height:1.4}.hero p{margin-bottom:1.5rem;max-width:620px}
+.grid{gap:1rem}.cb{gap:.5rem}
+@media(min-width:768px){.grid{grid-template-columns:repeat(3,1fr);gap:1.25rem}.card img,.ph{height:190px}.hero{padding:3.2rem 2rem}}
+@media(min-width:1024px){.grid{grid-template-columns:repeat(4,1fr);gap:1.75rem}.card img,.ph{height:220px}.hero{padding:4.5rem 3rem}.hero h1{font-size:2.5rem}.hero p{font-size:1.1rem}h2{font-size:1.7rem}.cb h3{font-size:1.05rem}.sg{gap:1.5rem}}
+@media(min-width:1600px){main,.hw{max-width:1280px}}
+@media(max-width:767px){.grid{grid-template-columns:repeat(2,1fr);gap:1rem}main,.hw{padding-inline:14px}}
+@media(max-width:340px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -224,7 +262,7 @@ orders(){
  if(!sess)return need();
  const g={};orders.forEach(x=>{if(!isAdmin()&&x.phone!==sess.phone)return;const o=g[x.code]=g[x.code]||{code:x.code,t:x.t,items:[],tot:0,st:x.status||'pending',name:x.name,phone:x.phone,pay:x.pay};o.items.push(x.title);o.tot+=x.price+(x.ship||0)-(x.ds||0)});
  const l=Object.values(g).reverse();
- return `<h2>${T('المشتريات المحجوزة','Reserved Orders')}</h2>`+(l.length?`<div class="box" style="max-width:100%;overflow-x:auto"><table class="tbl"><tr><th>${T('الكود','Code')}</th><th>${T('المنتجات','Items')}</th><th>${T('الإجمالي','Total')}</th><th>${T('الدفع','Payment')}</th><th>${T('التاريخ','Date')}</th><th>${T('الحالة','Status')}</th>${isAdmin()?`<th>${T('العميل','Customer')}</th>`:''}</tr>${l.map(o=>`<tr><td dir="ltr">${esc(o.code)}</td><td>${o.items.map(esc).join('<br>')}</td><td>${o.tot}</td><td>${payName(o.pay)}</td><td>${new Date(o.t).toLocaleDateString(lang==='ar'?'ar-EG':'en-GB')}</td><td>${isAdmin()?`<select onchange="setSt('${o.code}',this.value)" style="margin:0">${Object.keys(ST).map(k=>`<option value="${k}" ${k===o.st?'selected':''}>${ST[k][lang==='ar'?0:1]}</option>`).join('')}</select>`:`<span class="stt">${ST[o.st][lang==='ar'?0:1]}</span>`}</td>${isAdmin()?`<td>${esc(o.name)} ${esc(o.phone)}</td>`:''}</tr>`).join('')}</table></div>`:`<div class="empty">${T('لا توجد حجوزات بعد','No reservations yet')}</div>`);
+ return `<h2>${T('المشتريات المحجوزة','Reserved Orders')}</h2>`+(l.length?`<div class="box" style="max-width:100%;overflow-x:auto"><table class="tbl rt"><tr><th>${T('الكود','Code')}</th><th>${T('المنتجات','Items')}</th><th>${T('الإجمالي','Total')}</th><th>${T('الدفع','Payment')}</th><th>${T('التاريخ','Date')}</th><th>${T('الحالة','Status')}</th>${isAdmin()?`<th>${T('العميل','Customer')}</th>`:''}</tr>${l.map(o=>`<tr><td dir="ltr">${esc(o.code)}</td><td>${o.items.map(esc).join('<br>')}</td><td>${o.tot}</td><td>${payName(o.pay)}</td><td>${new Date(o.t).toLocaleDateString(lang==='ar'?'ar-EG':'en-GB')}</td><td>${isAdmin()?`<select onchange="setSt('${o.code}',this.value)" style="margin:0">${Object.keys(ST).map(k=>`<option value="${k}" ${k===o.st?'selected':''}>${ST[k][lang==='ar'?0:1]}</option>`).join('')}</select>`:`<span class="stt">${ST[o.st][lang==='ar'?0:1]}</span>`}</td>${isAdmin()?`<td>${esc(o.name)} ${esc(o.phone)}</td>`:''}</tr>`).join('')}</table></div>`:`<div class="empty">${T('لا توجد حجوزات بعد','No reservations yet')}</div>`);
 },
 wish(){return `<h2>${T('المفضلة','Wishlist')}</h2>${grid(products.filter(p=>wish.includes(p.id)))}`},
 cart(){
@@ -358,10 +396,12 @@ function confirmOrder(){
 }
 function route(){
  let r=location.hash.slice(1)||'home';if(!V[r])r='home';
- drawer(0);chrome();$('#app').innerHTML=V[r]();if(r==='shop')filt();scrollTo(0,0);
+ drawer(0);chrome();$('#app').innerHTML=V[r]();if(r==='shop')filt();document.querySelectorAll('.rt').forEach(t=>{const h=[...t.rows[0].cells].map(c=>c.textContent);[...t.rows].slice(1).forEach(r=>[...r.cells].forEach((c,i)=>c.dataset.l=h[i]||''))});scrollTo(0,0);
 }
 addEventListener('hashchange',route);
 addEventListener('storage',e=>{if(e.key&&e.key.startsWith('fk_')){products=load('products',products);comments=load('comments',{});orders=load('orders',[]);users=load('users',[]);route()}});
+addEventListener('focusin',e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)&&innerWidth<1024)document.body.classList.add('kb')});
+addEventListener('focusout',()=>setTimeout(()=>{if(!/INPUT|TEXTAREA|SELECT/.test((document.activeElement||{}).tagName||''))document.body.classList.remove('kb')},150));
 route();
 </script>
 </body>
